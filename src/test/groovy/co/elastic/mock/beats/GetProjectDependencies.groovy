@@ -25,6 +25,6 @@ class GetProjectDependencies extends co.elastic.beats.BeatsFunction {
         super(args)
     }
     public run(Map args = [:]){
-        return [ '^projectA/.*', '^projectB' ]
+        return [ '^projectA/.*', '^projectB', '^projectC/code/.*' ]
     }
 }

@@ -445,6 +445,118 @@ class BeatsWhenStepTests extends ApmBasePipelineTest {
   }
 
   @Test
+  void test_whenNotChangesetFullMatchWithFunction_and_no_data() throws Exception {
+    def script = loadScript(scriptName)
+    def ret = script.whenNotChangesetFullMatchWithFunction()
+    printCallStack()
+    assertFalse(ret)
+  }
+
+  @Test
+  void test_whenNotChangesetFullMatchWithFunction_and_content_without_match() throws Exception {
+    def script = loadScript(scriptName)
+    def changeset = 'Jenkinsfile'
+    helper.registerAllowedMethod('readFile', [String.class], { return changeset })
+    def ret = script.whenNotChangesetFullMatchWithFunction(content: [not_changeset_full_match_with_function: '^.ci'])
+    printCallStack()
+    assertTrue(ret)
+  }
+
+  @Test
+  void test_whenNotChangesetFullMatchWithFunction_and_content_with_match() throws Exception {
+    def script = loadScript(scriptName)
+    def changeset = 'Jenkinsfile'
+    helper.registerAllowedMethod('readFile', [String.class], { return changeset })
+    def ret = script.whenNotChangesetFullMatchWithFunction(content: [not_changeset_full_match_with_function: '^Jenkinsfile'])
+    printCallStack()
+    assertFalse(ret)
+  }
+
+  @Test
+  void test_whenNotChangesetFullMatchWithFunction_and_content_with_full_match() throws Exception {
+    def script = loadScript(scriptName)
+    def changeset = '''.ci/Jenkinsfile
+.ci/jobs
+'''
+    helper.registerAllowedMethod('readFile', [String.class], { return changeset })
+    def ret = script.whenNotChangesetFullMatchWithFunction(content: [not_changeset_full_match_with_function: '^.ci.*'])
+    printCallStack()
+    assertFalse(ret)
+  }
+
+  @Test
+  void test_whenNotChangesetFullMatchWithFunction_and_content_without_full_match_no_matches() throws Exception {
+    def script = loadScript(scriptName)
+    def changeset = '''.ci/Jenkinsfile
+.ci/jobs
+'''
+    helper.registerAllowedMethod('readFile', [String.class], { return changeset })
+    def ret = script.whenNotChangesetFullMatchWithFunction(content: [ not_changeset_full_match_with_function: '^.foo.*'])
+    printCallStack()
+    assertTrue(ret)
+  }
+
+  @Test
+  void test_whenNotChangesetFullMatchWithFunction_and_content_without_full_match_with_partial_matches() throws Exception {
+    def script = loadScript(scriptName)
+    def changeset = '''.ci/Jenkinsfile
+.foo/jobs
+'''
+    helper.registerAllowedMethod('readFile', [String.class], { return changeset })
+    def ret = script.whenNotChangesetFullMatchWithFunction(content: [ not_changeset_full_match_with_function: '^.ci.*'])
+    printCallStack()
+    assertTrue(ret)
+  }
+
+  @Test
+  void test_whenNotChangesetFullMatchWithFunction_content_and_macro() throws Exception {
+    def script = loadScript(scriptName)
+    def ret = script.whenNotChangesetFullMatchWithFunction(content: [ not_changeset_full_match_with_function: '@oss'],
+                                                           changeset: [ oss: [ '^oss'] ])
+    printCallStack()
+    assertTrue(ret)
+  }
+
+  @Test
+  void test_whenNotChangesetFullMatchWithFunction_content_and_macro_with_match() throws Exception {
+    def script = loadScript(scriptName)
+    def changeset = 'oss'
+    helper.registerAllowedMethod('readFile', [String.class], { return changeset })
+    def ret = script.whenNotChangesetFullMatchWithFunction(content: [ not_changeset_full_match_with_function: '@oss'],
+                                                           changeset: [ oss: [ '^oss'] ])
+    printCallStack()
+    assertFalse(ret)
+  }
+
+  @Test
+  void test_whenNotChangesetFullMatchWithFunction_content_and_function_without_match() throws Exception {
+    // When the changesetFunction matches a pattern
+    // Then the changeset partially matches the regex therefore the when condition should return false.
+    def script = loadScript(scriptName)
+    def changeset = '''projectC/code/my-file.go
+projectC/Jenkinsfile.yml
+'''
+    helper.registerAllowedMethod('readFile', [String.class], { return changeset })
+    def ret = script.whenNotChangesetFullMatchWithFunction(content: [ not_changeset_full_match_with_function: 'projectC/.*'],
+                                                           changesetFunction: new GetProjectDependencies())
+    printCallStack()
+    assertFalse(ret)
+  }
+
+  @Test
+  void test_whenNotChangesetFullMatchWithFunction_content_and_function_with_match() throws Exception {
+    // When the changesetFunction does not match a pattern
+    // Then the changeset matches the regex therefore the when condition should return true.
+    def script = loadScript(scriptName)
+    def changeset = 'projectC/Jenkinsfile'
+    helper.registerAllowedMethod('readFile', [String.class], { return changeset })
+    def ret = script.whenNotChangesetFullMatchWithFunction(content: [ not_changeset_full_match_with_function: 'projectC/Jenkinsfile'],
+                                                           changesetFunction: new GetProjectDependencies())
+    printCallStack()
+    assertTrue(ret)
+  }
+
+  @Test
   void test_whenParameters_and_no_params() throws Exception {
     def script = loadScript(scriptName)
     def ret = script.whenParameters()

@@ -39,6 +39,7 @@ Boolean call(Map args = [:]){
     if (whenLabels(args)) { ret = true }
     if (whenNotChangeset(args)) { ret = true }
     if (whenNotChangesetFullMatch(args)) { ret = true }
+    if (whenNotChangesetFullMatchWithFunction(args)) { ret = true }
     if (whenParameters(args)) { ret = true }
     if (whenTags(args)) { ret = true }
   } else {
@@ -74,6 +75,7 @@ private Boolean whenChangeset(Map args = [:]) {
 private Boolean changeset(Map args = [:]) {
   def name = args.get('name', 'Changeset')
   def partialMatch = args.get('partialMatch', true)
+  def markdown = args.get('markdown', true)
   // Gather macro changeset entries
   def macro = [:]
   args?.changeset?.each { k,v ->
@@ -131,10 +133,14 @@ private Boolean changeset(Map args = [:]) {
     }
   }
   if (match) {
-    markdownReason(project: args.project, reason: "* ✅ ${name} is `enabled` and matches with the pattern `${match}`.")
+    if (markdown) {
+      markdownReason(project: args.project, reason: "* ✅ ${name} is `enabled` and matches with the pattern `${match}`.")
+    }
     return true
   } else {
-    markdownReason(project: args.project, reason: "* ${name} is `enabled` and does **NOT** match with the pattern `${fileContent}`.")
+    if (markdown) {
+      markdownReason(project: args.project, reason: "* ${name} is `enabled` and does **NOT** match with the pattern `${fileContent}`.")
+    }
   }
   return false
 }
@@ -194,6 +200,30 @@ private Boolean whenNotChangesetFullMatch(Map args = [:]) {
     arguments.name = name
     arguments.content.remove('changesetFunction')
     return !whenChangeset(arguments)
+  } else {
+    markdownReason(project: args.project, reason: "* ❕${name} is `disabled`.")
+  }
+  return false
+}
+
+private Boolean whenNotChangesetFullMatchWithFunction(Map args = [:]) {
+  def name = 'whenNotChangesetFullMatchWithFunction'
+  if (args.content?.get('not_changeset_full_match_with_function')) {
+    // See if the changesetFunction matches
+    def argumentsWithFunction = args
+    argumentsWithFunction.markdown = false
+    // If no changeset matches then run no changeset full match
+    if (changeset(argumentsWithFunction)) {
+      markdownReason(project: args.project, reason: "* ❕${name} is `disabled`.")
+      return false
+    } else {
+      def arguments = args
+      arguments.content.changeset = [ args.content.get('not_changeset_full_match_with_function') ]
+      arguments.partialMatch = false
+      arguments.name = name
+      arguments.content.remove('changesetFunction')
+      return !whenChangeset(arguments)
+    }
   } else {
     markdownReason(project: args.project, reason: "* ❕${name} is `disabled`.")
   }
