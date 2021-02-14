@@ -30,6 +30,30 @@ Jenkins pipeline shared library for the project APM
 * [Pipeline shared library](https://jenkins.io/doc/book/pipeline/shared-libraries/)
 * [Steps Documentation](vars/README.md)
 
+
+## User Documentation
+
+TBC
+# Known Issues
+
+A list of known issues is available on the [GitHub issues page of this project][apm-pipeline-library-issues].
+
+# How to obtain support
+
+Feel free to open new issues for feature requests, bugs or general feedback on
+the [GitHub issues page of this project][apm-pipeline-library-issues].
+
+# Contributing
+
+Read and understand our [contribution guidelines][apm-pipeline-library-contribution]
+before opening a pull request.
+
+<sup><br>Made with ♥️ and ☕️ by Elastic and our community.</sup>
+
+[apm-pipeline-library-issues]: https://github.com/elastic/apm-pipeline-library/issues
+[apm-pipeline-library-license]: ./LICENSE
+[apm-pipeline-library-contribution]: CONTRIBUTING.md
+
 ## Requirements
 
 In order to test the library you need Maven 3 installed, also, it is possible to use
