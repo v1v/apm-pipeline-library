@@ -83,7 +83,7 @@ function sedCommand() {
 }
 
 function curlCommand() {
-    curl --silent --max-time 600 --connect-timeout 30 -o "$1" "$2" --fail
+    curl -k --silent --max-time 600 --connect-timeout 30 -o "$1" "$2" --fail
 }
 
 function fetch() {
@@ -329,7 +329,7 @@ function fetchAndDefaultStepsInfo() {
             tmp="$(mktemp -d)/step.log"
             for href in $(jq -r 'map(select(.type=="STEP" and .result=="FAILURE" and .displayDescription==null) | ._links.self.href) | .[]' "${output}"); do
                 id=$(basename "${href}")
-                new=$(curl -s "${BASE_URL}${href}log/" | head -c 100)
+                new=$(curl -k -s "${BASE_URL}${href}log/" | head -c 100)
                 curlCommand "${tmp}" "${BASE_URL}${href}log/"
                 ## If the URL was unreachable then the file won't exist.
                 ## For such use case, then avoid any transformation.
